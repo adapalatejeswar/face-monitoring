@@ -1,0 +1,57 @@
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.2/css/all.css">
+<div ng-app="myApp" ng-controller="myCtrl">
+<div class="container" id="container">
+  <div class="form-container sign-up-container">
+    <form action="#">
+      <div class="social-container">
+        <img src="assets/images/hog.png" style="width:300px;height:230px;">
+      </div>
+      <h1>Create Account</h1>
+      <input type="text" placeholder="First Name"/>
+      <input type="text" placeholder="Last Name"/>
+      <input [(ngModel)]="emailAdr" [ngModelOptions]="{standalone: true}" type="email" placeholder="Email"/>
+      <input [(ngModel)]="password" [ngModelOptions]="{standalone: true}" type="password" placeholder="Password"/>
+      <label for="img1">Please upload document ID:</label>
+      <input (change)="onSelectSignupFile($event)" type="file" id="img1" name="img" accept="image/*">
+      <button (click)="signup()"class="su">Sign Up</button>
+    </form>
+  </div>
+  <div class="form-container sign-in-container">
+    <form action="#">
+      <div class="social-container">
+        <img src="assets/images/hog.png" style="width:300px;height:230px;">
+      </div>
+      <input id="username"  [(ngModel)]="username" [ngModelOptions]="{standalone: true}" type="text"  placeholder="Email" />
+      <input type="password" placeholder="Password"/>
+      <label>Capture or Select image for facial recognition</label>
+      <!--<input type='file' (change)="onSelectFile($event)">-->
+      <!--div style="text-align:center">-->
+      <div>
+        <webcam [height]="275" [width]="275" [trigger]="triggerObservable" (imageCapture)="handleImage($event)" *ngIf="showWebcam"
+                (initError)="handleInitError($event)"></webcam>
+        <br/>
+
+        <div class="actionBtn" (click)="triggerSnapshot();" title="Take Picture"></div>
+        <!--<div class="actionBtn" (click)="showNextWebcam(true);" title="Switch Camera">🔁</div>-->
+      </div>
+      <a>I Forgot my Password</a>
+      <button class="actionBtn" (click)="triggerSnapshot();" title="Take Picture" (click)="login()" class="si">Sign In
+      </button>
+    </form>
+  </div>
+  <div class="overlay-container">
+    <div class="overlay">
+      <div class="overlay-panel overlay-left">
+        <h1>Welcome Back!</h1>
+        <p>Please login to view you Cambridge Assessments account</p>
+        <button class="ghost" id="signIn">Sign In</button>
+      </div>
+      <div class="overlay-panel overlay-right">
+        <h1>Sign up</h1>
+        <p>Enter your personal details and start journey with us</p>
+        <button class="ghost" id="signUp">Sign Up</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
