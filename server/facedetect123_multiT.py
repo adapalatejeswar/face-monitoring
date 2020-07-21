@@ -8,6 +8,7 @@ from flask_cors import CORS, cross_origin
 from flask import jsonify
 import time
 from flask_socketio import SocketIO, emit, send
+from engineio.payload import Payload
 from circular_buf import RingBuffer
 
 app = Flask(__name__)
@@ -15,6 +16,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 #app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app, resources={r"/": {"origins": "*"}})
 
+Payload.max_decode_packets = 500
 socketio = SocketIO(app, cors_allowed_origins="*")
 fourcc = cv2.VideoWriter_fourcc(*'X264')
 out = cv2.VideoWriter('output.mp4',fourcc, 20.0, (640,480))
@@ -65,9 +67,9 @@ def connect_message(message):
     print('[INFO] CV client message: {} and {}'.format(request.sid,message))
     retval = True
     errormsg = 'Success'
-    #emit('message_out', 'Hello')
-    with SocketIO('localhost', 5000, '/') as socketIO:
-        socketIO.emit('message_out',"hello world", namespace='/')
+    emit('message_out', message)
+    # with SocketIO('localhost', 5000, '/') as socketIO:
+    #     socketIO.emit('message_out',"hello world", namespace='/')
     return jsonify({"error": errormsg, "valid": retval})
 
 servercountsharebuff = 0
@@ -76,10 +78,10 @@ servercountsharebuff = 0
 @cross_origin(origin='http://localhost:4200',headers=['Content-Type','Access-Control-Allow-Origin'])
 def connect_image(img):
     global image, servercountsharebuff#, clientToServerSharedBuf
-    print('[INFO] CV client image: ')
+    # print('[INFO] CV client image: ')
     #image = np.array(Image.open(BytesIO(base64.b64decode(img))))
     servercountsharebuff = servercountsharebuff+1
-    print(servercountsharebuff)
+    # print(servercountsharebuff)
     imageString = base64.b64decode(img)
     nparr = np.fromstring(imageString, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR);
@@ -93,7 +95,7 @@ def connect_image(img):
     retval = True
     errormsg = 'Success'
     #emit('message_out', 'Hello')
-    #emit('image_out', img)
+    emit('image_out', img)
     return jsonify({"error": errormsg, "valid": retval})
 
 
