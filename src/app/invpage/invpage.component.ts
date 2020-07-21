@@ -25,9 +25,9 @@ export class InvpageComponent implements OnInit {
       //this.socketlisten();
       //this.socket.connect()
       //this.socket.nsp = '/invpage'
-      this.socket.on('message_out', function(message) {
-      console.log(message);
-     })
+    //   this.socket.on('message_out', function(message) {
+    //   console.log(message);
+    //  })
     
 }
 
