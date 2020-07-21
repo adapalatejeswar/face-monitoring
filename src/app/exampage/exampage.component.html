@@ -1,20 +1,17 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<nav id= "main_nav" class="navbar navbar-inverse">
+<nav id="main_nav" class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
       <a class="navbar-brand" href="#"><img src="assets/images/hog2.png"></a>
     </div>
     <div>
-      <webcam [height]="100" [width]="100" [trigger]="triggerObservable" (imageCapture)="handleImage($event)" *ngIf="showWebcam"
-              (initError)="handleInitError($event)"></webcam>
+      <webcam [height]="100" [width]="100" [trigger]="triggerObservable" (imageCapture)="handleImage($event)"
+        *ngIf="showWebcam" [videoOptions]="videoOptions" (initError)="handleInitError($event)"></webcam>
 
-      <br/>
-      <br>
-      
     </div>
-    <!-- <div>
-      <img [src]="webcamImage.imageAsDataUrl"/>
-      </div> -->
+    <div>
+      <img [src]="outimg" width="320px" height="240px"/>
+    </div>
     <ul class="nav navbar-nav">
       <li class="active"><a href="#">Home</a></li>
       <li><a href="#">Profile</a></li>
@@ -23,11 +20,8 @@
     <ul class="nav navbar-nav navbar-right">
       <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
     </ul>
-    
   </div>
-
 </nav>
-
 <form>
 
   <fieldset>
