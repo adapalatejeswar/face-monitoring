@@ -14,9 +14,9 @@ python -m pip install -r ./server/requirements.txt;
 
 echo "Installing nginx";
 
-cp -r scripts/nginx/default /etc/nginx/sites-available/;
-
 apt-get install --yes nginx;
+
+cp -r scripts/nginx/default /etc/nginx/sites-available/;
 
 service nginx restart;
 
