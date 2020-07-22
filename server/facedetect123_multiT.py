@@ -70,7 +70,7 @@ def connect_image(img):
     #   print("Success  3")
     retval = True
     errormsg = 'Success'
-    emit('image_out', img)
+    emit('image_out', img, broadcast=True)
     return jsonify({"error": errormsg, "valid": retval})
 
 counter_video_feed = 0

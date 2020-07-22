@@ -38,8 +38,6 @@
         <h5>Webcam preview</h5>
         <webcam [height]="320" [width]="240" [trigger]="triggerObservable" (imageCapture)="handleImage($event)"
           *ngIf="showWebcam" [videoOptions]="videoOptions" (initError)="handleInitError($event)"></webcam>
-        <br />
-        <img [src]="outimg" width="320px" height="240px" />
       </div>
     </div>
   </div>
