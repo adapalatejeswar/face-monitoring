@@ -10,6 +10,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { WebcamModule } from 'ngx-webcam';
 import { AppRoutingModule } from './app-routing.module';
+import { HeaderComponent } from './header/header.component';
+import { ProfileComponent } from './profile/profile.component';
 
 
 @NgModule({
@@ -19,7 +21,9 @@ import { AppRoutingModule } from './app-routing.module';
     HomeComponent,
     ExampageComponent,
     ExamcompleteComponent,
-    InvpageComponent
+    InvpageComponent,
+    HeaderComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule,

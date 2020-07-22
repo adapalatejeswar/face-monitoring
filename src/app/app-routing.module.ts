@@ -6,12 +6,14 @@ import { ExammenuComponent } from './exammenu/exammenu.component';
 import { ExampageComponent } from './exampage/exampage.component';
 import { HomeComponent } from './home/home.component';
 import { InvpageComponent } from './invpage/invpage.component';
+import { ProfileComponent } from './profile/profile.component';
 
 const routes: Routes = [
   { path: 'examcomplete', component: ExamcompleteComponent },
   { path: 'exammenu', component: ExammenuComponent },
   { path: 'exampage', component: ExampageComponent },
   { path: 'invpage', component: InvpageComponent },
+  { path: 'profile', component: ProfileComponent},
   { path: 'app', component: AppComponent },
   { path: '', pathMatch: 'full', component: HomeComponent },
   { path: '**', component: HomeComponent }

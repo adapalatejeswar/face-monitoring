@@ -1,16 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="#"><img src="assets/images/hog2.png"></a>
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Profile</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Exam List</a></li>
-    </ul>
-    <ul class="nav navbar-nav navbar-right">
-      <li class="nav-item"><a class="nav-link" href="#"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
-    </ul>
-  </div>
-</nav>
+<app-header></app-header>
 <form>
   <fieldset>
     <legend>Please select your exam</legend>
@@ -21,7 +9,5 @@
     <input type="radio" id="radio3" name="radios">
     <label for="radio3">Advance study : Potion Masterclass Exam</label>
   </fieldset>
-
-
   <button (click)="startExam()">Submit</button>
 </form>
