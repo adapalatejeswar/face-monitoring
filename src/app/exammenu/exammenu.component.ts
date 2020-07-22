@@ -1,22 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import {Router} from  '@angular/router'
-
+import { Component } from '@angular/core';
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'app-exammenu',
   templateUrl: './exammenu.component.html',
   styleUrls: ['./exammenu.component.scss']
 })
-export class ExammenuComponent{
+export class ExammenuComponent {
 
-  constructor(private router:Router) { }
+  constructor(private router: Router) { }
 
-  ngOnInit() {
-
-  }
-
-  startExam(){
-   this.router.navigate(['exampage']);
-
+  startExam() {
+    this.router.navigate(['exampage']);
   }
 }

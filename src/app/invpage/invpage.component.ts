@@ -1,13 +1,7 @@
 import { Component, OnInit, EventEmitter } from '@angular/core';
-import {Router} from  '@angular/router';
-// 1 added new for monitoring - starts//
-import {Subject, Observable} from 'rxjs';
-import {WebcamImage, WebcamInitError, WebcamUtil} from 'ngx-webcam';
-import {HttpClient, HttpHeaders } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import * as io from 'socket.io-client';
-
-// 1 added new for monitoring - ends//
 
 @Component({
   selector: 'app-invpage',
@@ -15,38 +9,23 @@ import * as io from 'socket.io-client';
   styleUrls: ['./invpage.component.scss']
 })
 export class InvpageComponent implements OnInit {
+  public socket: any;
+  public outimg : string = '';
 
-  constructor(private router:Router,private http:HttpClient) { } //2 added for HTTPClient
-  socket = io.connect('http://localhost:5000')
-  //public intervalHandle: any;
+  constructor(private router: Router, private http: HttpClient) {
+    this.socket = io('http://localhost:5000', { transports: ['polling'] })
+  }
 
+  public ngOnInit(): void { 
+    this.socket.on('image_out', (message) => {
+      this.outimg = "data:image/png;base64,"+message;
+    })
+  }
 
-  public ngOnInit(): void{
-      //this.socketlisten();
-      //this.socket.connect()
-      //this.socket.nsp = '/invpage'
-    //   this.socket.on('message_out', function(message) {
-    //   console.log(message);
-    //  })
-    
-}
-
-
-// public socketlisten(): void{
-//   // this.imagestr =  this.webcamImage;
-//    this.intervalHandle = 
-//    setInterval(() => {
-//      this.socket.on('message_out', function(message) {
-//       console.log(message);
-//      })
-//  }, 40);
-//    };
-
-public disconnectall(): void{
-  console.log('disconnectall');
-  this.socket.emit('disconnect');
-  this.socket.disconnect();
-
-}
+  public disconnectall(): void {
+    console.log('disconnectall');
+    this.socket.emit('disconnect');
+    this.socket.disconnect();
+  }
 
 }
