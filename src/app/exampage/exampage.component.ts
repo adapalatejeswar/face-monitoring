@@ -40,6 +40,7 @@ export class ExampageComponent implements OnInit {
         this.multipleWebcamsAvailable = mediaDevices && mediaDevices.length > 1;
       }).then(() => {
         this.socketcontinue();
+        this.postcontinue();
       });
   };
   public handleImage(webcamImage: WebcamImage): void {
@@ -61,16 +62,10 @@ export class ExampageComponent implements OnInit {
         let headers = new HttpHeaders({
           'Content-Type': 'application/json'
         });
-        this.http.post("http://localhost:5000/videoStreaming", { img: this.webcamImage.imageAsBase64 }, { headers }).subscribe((res: any) => {
-          //this.loginResponse = JSON.stringify(res)
-          //  alert(this.loginResponse);  
-          if (res.valid === false) {
-            alert(res.error);
-          }
+        this.http.post("http://localhost:5000/videoRecording", { img: this.webcamImage.imageAsBase64 }, { headers }).subscribe((res: any) => {
           console.log(res);
-
         })
-      }, 40); // currently interval is set for every 5 seconds.
+      }, 125); // currently interval is set for every 5 seconds.
   };
   public handleInitError(error: WebcamInitError): void {
     this.errors.push(error);
@@ -85,17 +80,17 @@ export class ExampageComponent implements OnInit {
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
-    // this.http.post("http://localhost:5000/videoStreamingClose", { img: this.webcamImage.imageAsBase64 }, {headers }).subscribe((res:any) => {
-    //this.loginResponse = JSON.stringify(res)
-    //  alert(this.loginResponse);  
-    // if (res.valid === false){
-    //   alert(res.error);
-    // }
-    //console.log(res);
-    //});
+    this.http.post("http://localhost:5000/videoRecordingClose", { img: this.webcamImage.imageAsBase64 }, {headers }).subscribe((res:any) => {
+    this.loginResponse = JSON.stringify(res)
+    //alert(this.loginResponse);  
+    if (res.valid === false){
+      alert(res.error);
+    }
+    console.log(res);
+    });
 
-    // this.socket.emit('disconnect');
-    // this.socket.disconnect();
+    this.socket.emit('disconnect');
+    this.socket.disconnect();
 
     this.router.navigate(['examcomplete']);
   };
