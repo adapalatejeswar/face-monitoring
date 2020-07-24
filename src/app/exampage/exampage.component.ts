@@ -4,6 +4,7 @@ import { Subject, Observable } from 'rxjs';
 import { WebcamImage, WebcamInitError, WebcamUtil } from 'ngx-webcam';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as io from 'socket.io-client';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-exampage',
@@ -12,6 +13,7 @@ import * as io from 'socket.io-client';
 })
 export class ExampageComponent implements OnInit {
   public socket: any
+  public statuserr : any
   public pictureTaken = new EventEmitter<WebcamImage>();
   public imagestr: any;
   public showWebcam = true;
@@ -47,8 +49,13 @@ export class ExampageComponent implements OnInit {
     this.webcamImage = webcamImage;
   };
   public socketcontinue(): void {
-    this.socket.on('image_out', (message) => {
-      this.outimg = "data:image/png;base64," + message;
+    // this.socket.on('image_out', (message) => {
+    //   this.outimg = "data:image/png;base64," + message;
+    // })
+    this.socket.on('freezeMsg', (message) => {
+      //console.log('freezeMsg');
+      console.log(message);
+      alert(message);
     })
     this.intervalHandle = setInterval(() => {
       this.trigger.next();
@@ -82,10 +89,7 @@ export class ExampageComponent implements OnInit {
     });
     this.http.post("http://localhost:5000/videoRecordingClose", { img: this.webcamImage.imageAsBase64 }, {headers }).subscribe((res:any) => {
     this.loginResponse = JSON.stringify(res)
-    //alert(this.loginResponse);  
-    if (res.valid === false){
-      alert(res.error);
-    }
+    //alert(this.loginResponse);
     console.log(res);
     });
 

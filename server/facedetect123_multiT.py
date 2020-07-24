@@ -38,13 +38,15 @@ size_back = size/2
 size_front = size/2
 record_clip = False
 detect_face = False
+errormsg = ''
+
 
 @app.route('/videoRecording', methods=['GET', 'POST'])
 #@cross_origin(origin='*',headers=['access-control-allow-origin','Content-Type'])
 @cross_origin(origin='http://localhost:4200',headers=['Content-Type','Access-Control-Allow-Origin'])
 #@cross_origin()
 def videoRecording():
-    global first
+    global first, errormsg
     global clip_face
     global counter,counter_front, buffer, size_back,size_front, record_clip
     if request.method == 'POST':
@@ -98,7 +100,7 @@ def videoRecording():
                 print('Fail')
                 retval =False
                 record_clip = True
-                errormsg = 'No Person Available'
+                errormsg = 'NoPerson'
             elif(faces.shape[0] == 1):
                 if(np.size(loc) > 0):
                     print('Success')
@@ -108,12 +110,12 @@ def videoRecording():
                     print('Fail')
                     retval =False
                     record_clip = True
-                    errormsg = 'Not the same person'
+                    errormsg = 'DifferentPerson'
             else:
                 print('Fail')
                 retval =False
                 record_clip = True
-                errormsg = 'More Than One Person Available'
+                errormsg = 'ManyPerson'
                 
             
         #cv2.imwrite('tej_web.jpg', img)
@@ -191,10 +193,26 @@ def connect_web():
 
 @socketio.on('message', namespace='/')
 def connect_message(message):
+    global errormsg
     print('[INFO] CV client message: {} and {}'.format(request.sid,message))
     retval = True
-    errormsg = 'Success'
-    emit('message_out', message)
+    emit('AnomalyMsg', errormsg)
+    return jsonify({"error": errormsg, "valid": retval})
+
+@socketio.on('freeze', namespace='/')
+def connect_message(message):
+    print('[INFO] CV client message: {} and {}'.format(request.sid,message))
+    retval = True
+    errormsg = "freeze"
+    emit('freezeMsg', errormsg, broadcast=True)
+    return jsonify({"error": errormsg, "valid": retval})
+
+@socketio.on('unfreeze', namespace='/')
+def connect_message(message):
+    print('[INFO] CV client message: {} and {}'.format(request.sid,message))
+    retval = True
+    errormsg = "unfreeze"
+    emit('freezeMsg', "unfreeze", broadcast=True)
     return jsonify({"error": errormsg, "valid": retval})
 
 servercountsharebuff = 0
@@ -202,57 +220,18 @@ servercountsharebuff = 0
 @socketio.on('image')
 def connect_image(img):
     global image, servercountsharebuff
+    global errormsg
     servercountsharebuff = servercountsharebuff+1
     #   print(servercountsharebuff)
     imageString = base64.b64decode(img)
     nparr = np.fromstring(imageString, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR)
     retval = True
-    errormsg = 'Success'
     emit('image_out', img, broadcast=True)
+    #emit('AnomalyMsg', errormsg)
+    errormsg = 'Success'
     return jsonify({"error": errormsg, "valid": retval})
 
-counter_video_feed = 0
-countsharebuff = 0
-def gen_frames():  # generate frame by frame from camera
-    global image, countsharebuff#   clientToServerSharedBuf
-    while True:
-        #image = clientToServerSharedBuf.pop()
-        countsharebuff = countsharebuff+1
-        print(countsharebuff)
-        ret, buffer = cv2.imencode('.jpg', image)
-        frame = buffer.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-#        image = clientToServerSharedBuf.pop()
-#        countsharebuff = countsharebuff+1
-#        print(countsharebuff)
-#        ret, buffer = cv2.imencode('.jpg', image)
-#        frame = buffer.tobytes()
-#        yield (b'--frame\r\n'
-#               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-#        image = clientToServerSharedBuf.pop()
-#        countsharebuff = countsharebuff+1
-#        print(countsharebuff)
-#        ret, buffer = cv2.imencode('.jpg', image)
-#        frame = buffer.tobytes()
-#        yield (b'--frame\r\n'
-#               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-@app.route('/video_feed', methods=['GET', 'POST'])
-#@socketio.on('/video_feed')
-#@cross_origin(origin='*',headers=['access-control-allow-origin','Content-Type'])
-#@cross_origin(origin='http://localhost:4200',headers=['Content-Type','Access-Control-Allow-Origin'])
-#@cross_origin()
-def video_feed():
-    """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen_frames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route('/')
-def index():
-    """Video streaming home page."""
-    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False, port=5000)
