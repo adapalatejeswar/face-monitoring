@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request
 import pandas as pd
 import cv2
 import numpy as np
 import base64
+import requests
+import json
+#from flask.ext.cors import cross_origin
 from flask_cors import CORS, cross_origin
 from flask import jsonify
 import time
@@ -11,17 +14,18 @@ from engineio.payload import Payload
 from circular_buf import RingBuffer
 import threading
 import datetime as dt
+import os.path
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 cors = CORS(app, resources={r"/": {"origins": "*"}})
+#cors = CORS(app, resources={r"/add_face": {"origins": "http://localhost:3000"}})
 
 Payload.max_decode_packets = 500
 socketio = SocketIO(app, cors_allowed_origins="*")
 fourcc = cv2.VideoWriter_fourcc(*'X264')
-out = cv2.VideoWriter('output.mp4',fourcc, 8.0, (160,120))
 clientToServerSharedBufsize = 500
-#clientToServerSharedBuf = RingBuffer(shape=(clientToServerSharedBufsize, 480,640,3))
+out = cv2.VideoWriter('finaloutput.mp4',fourcc, 8.0, (160,120))
 
 #template = cv2.imread("tej_web2.jpg", cv2.IMREAD_GRAYSCALE)
 #w, h = template.shape[::-1]
@@ -30,7 +34,7 @@ cascPath = "haarcascade_frontalface_default.xml"
 faceCascade = cv2.CascadeClassifier(cascPath)
 first = True
 clip_face = []
-size = 200
+size = 100
 counter = 0
 counter_front = 0
 buffer = RingBuffer(shape=(size, 120,160,3))
@@ -40,15 +44,14 @@ record_clip = False
 detect_face = False
 errormsg = ''
 
-
 @app.route('/videoRecording', methods=['GET', 'POST'])
 #@cross_origin(origin='*',headers=['access-control-allow-origin','Content-Type'])
 @cross_origin(origin='http://localhost:4200',headers=['Content-Type','Access-Control-Allow-Origin'])
 #@cross_origin()
 def videoRecording():
-    global first, errormsg
+    global first
     global clip_face
-    global counter,counter_front, buffer, size_back,size_front, record_clip
+    global counter,counter_front, buffer, size_back,size_front, record_clip,flag
     if request.method == 'POST':
         #  read encoded image
         #print(request.json) 
@@ -67,26 +70,29 @@ def videoRecording():
         buffer.append(img)
         print(counter)
         counter = counter + 1
+        URL = "http://localhost:8080/ca/storeFlags"
+        name = "Harry Potter"
         #img = cv2.imdecode(nparr, 1);
 #        cv2.imshow("frame", img)
 #        cv2.waitKey(0)
 #        cv2.destroyAllWindows()
         detect_face = False
-        if(counter % 8 == 0):
+        if(counter % 40 == 0):
             detect_face = True
             gray_frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = faceCascade.detectMultiScale(
                 gray_frame,
                 scaleFactor=1.1,
                 minNeighbors=5,
-                minSize=(30, 30)
+                minSize=(30, 30),
             )
+        
             
             if(np.size(faces) > 0):
                 if(first == True):
                     x,y,h,w = faces[0]
                     clip_face = gray_frame[y:y+h, x:x+w]
-                    cv2.imwrite("detectedboxes.jpg", clip_face)
+                    cv2.imwrite("detected-boxes.jpg", clip_face)
                     first = False
             
             res = cv2.matchTemplate(gray_frame, clip_face, cv2.TM_CCOEFF_NORMED)
@@ -100,7 +106,13 @@ def videoRecording():
                 print('Fail')
                 retval =False
                 record_clip = True
-                errormsg = 'NoPerson'
+                errormsg = 'No Face Detected'
+                flag = 'No Face Detected'
+                data = {'name':'Harry Potter','flag':'No Face Detected', 'timeStamp':'cool','url':'assets/no_face_clip.mp4'}
+                headers = {'content-type': 'application/json'}
+                r = requests.post(url = URL, data = json.dumps(data),headers=headers)
+                print(r.json)
+
             elif(faces.shape[0] == 1):
                 if(np.size(loc) > 0):
                     print('Success')
@@ -110,12 +122,22 @@ def videoRecording():
                     print('Fail')
                     retval =False
                     record_clip = True
-                    errormsg = 'DifferentPerson'
+                    errormsg = 'Incorrect Face Detected'
+                    flag = 'Incorrect Face Detected'
+                    data = {'name':'Harry Potter','flag':'Incorrect Face Detected', 'timeStamp':'cool','url':'assets/incorrect_face_clip.mp4'}
+                    headers = {'content-type': 'application/json'}
+                    r = requests.post(url = URL, data = json.dumps(data),headers=headers)
+                    print(r.json)
             else:
                 print('Fail')
                 retval =False
                 record_clip = True
-                errormsg = 'ManyPerson'
+                errormsg = 'Second Face Detected'
+                flag = 'Second Face Detected'
+                data = {'name':'Harry Potter','flag':'Second Face Detected', 'timeStamp':'cool','url':'assets/second_face_clip.mp4'}
+                headers = {'content-type': 'application/json'}
+                r = requests.post(url = URL, data = json.dumps(data),headers=headers)
+                print(r.json)
                 
             
         #cv2.imwrite('tej_web.jpg', img)
@@ -124,7 +146,12 @@ def videoRecording():
             print(counter_front)
             counter_front = counter_front + 1
             if(counter_front == size_front):
-                out_clip = cv2.VideoWriter('output_clip' + dt.datetime.now().strftime("%Y%m%d%H%M%S.mp4"),fourcc, 8.0, (160,120))
+                if(flag == "Second Face Detected"):
+                    out_clip = cv2.VideoWriter('second_face_clip.mp4',fourcc, 8.0, (160,120))
+                elif(flag == "Incorrect Face Detected"):
+                    out_clip = cv2.VideoWriter('incorrect_face_clip.mp4',fourcc, 8.0, (160,120))
+                elif(flag == "No Face Detected"):
+                    out_clip = cv2.VideoWriter('no_face_clip.mp4',fourcc, 8.0, (160,120))
                 for i in range(1,size):
                     img = buffer.read_bottom(i+ buffer.bottom)
                     #img = buffer.pop()
@@ -163,18 +190,18 @@ def videoRecordingClose():
 #        cv2.waitKey(0)
 #        cv2.destroyAllWindows()
         out.write(img)      
+        out.release()
         #cv2.imwrite('tej_web.jpg', img)
+        finalURL = "http://localhost:8080/ca/storeFinalFlags"
+        data = {'name':'Harry Potter','flag':'Incorrect Face Detected, Second Face Detected, No Face Detected', 'timeStamp':'cool','url':'assets/finaloutput.mp4'}
+        headers = {'content-type': 'application/json'}
+        r = requests.post(url = finalURL, data = json.dumps(data),headers=headers)
         print('Success')
         retval = True
         print('Success Exit')
-        out.release()
     return ('', 204)
 
-
 image = 0
-image_prev = 0
-image_prev_prev = 0
-countsharebuff = 0
 
 @socketio.on('connect')
 def connect_client():
